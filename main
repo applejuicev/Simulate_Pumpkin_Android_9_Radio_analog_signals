@@ -3,6 +3,7 @@
  * code by appeljuicev 
  * Date 10.04.2020
  * Simulate_Pumpkin_Android_9_Radio_analog_signals * 
+ * Press + , - , u oder d for different Analog Outputs and use the steering wheel button learn app for allocating your funktion
  */
 #include <SoftwareSerial.h>
 #define PIN 9
