@@ -1,0 +1,97 @@
+
+/*
+ * code by appeljuicev 
+ * Date 10.04.2020
+ * Simulate_Pumpkin_Android_9_Radio_analog_signals * 
+ */
+#include <SoftwareSerial.h>
+#define PIN 9
+#define ShortKlick 160u
+//ms
+#define LongKlick 1500 //ms
+#define idleDutycycle 155 //ca. 3.3V
+int duty = 50;
+int i;
+byte buffer = 0;
+char bufferChecked = 0;
+
+void setup()
+{
+  pinMode(PIN, OUTPUT);
+  analogWrite(PIN, idleDutycycle); // Inital 3,3V
+  TCCR1B = TCCR1B & B11111000 | B00000001;    // set timer 1 divisor to 1 for PWM frequency of ~31 kHz
+  Serial.begin(57600);
+  while (!Serial) {
+    // wait for serial port to connect. Needed for native USB port only
+    if (i > 500) {
+      break;
+    }
+    else {
+      i++;
+    }
+  }
+  Serial.println("Gebe +, -, u(p) oder d(own) ein.");
+}
+
+
+void loop() {
+  while (!Serial.available());
+  Serial.readBytes(&buffer, 1);
+  while (Serial.available() > 0) { //flushing reset of data
+    Serial.read();
+  }
+
+  if (buffer == '+' || buffer == '-' || buffer == 'u' || buffer == 'd' || buffer == 'f' || buffer == 'i') {
+
+    bufferChecked =  buffer;
+
+    switch (bufferChecked) {
+      case '+':
+        Serial.println("Lauter!");
+        analogWrite(PIN, 133);          // 133Duty == 2,48V
+        delay(ShortKlick);
+        analogWrite(PIN, idleDutycycle);
+        break;
+      case '-':
+        Serial.println("Leiser!");
+        analogWrite(PIN, 112);          // 112Duty == 1,66V
+        delay(ShortKlick);
+        analogWrite(PIN, idleDutycycle);
+        break;
+      case 'u':
+        Serial.println("Hoch!");
+        analogWrite(PIN, 78);          // 78Duty == 0,84V
+        delay(ShortKlick);
+        analogWrite(PIN, idleDutycycle);
+        break;
+      case 'i':
+        Serial.println("Hoch!!!!");
+        analogWrite(PIN, 78);          // 78Duty == 0,84V
+        delay(LongKlick);
+        analogWrite(PIN, idleDutycycle);
+        break;
+      case 'd':
+        Serial.println("Runter!");
+        analogWrite(PIN, 0);          // 0 == GND
+        delay(ShortKlick);
+        analogWrite(PIN, idleDutycycle);
+        break;
+      case 'f':
+        Serial.println("Runter!!!!");
+        analogWrite(PIN, 0);          // 0 == GND
+        delay(LongKlick);
+        analogWrite(PIN, idleDutycycle);
+        break;
+      default:
+        analogWrite(PIN, idleDutycycle);  // indledutycycle == ~3.3V
+        Serial.print("Falsche Eingabe!  Clear...");
+        for (int a = 0; a <= 10; a++)
+        {
+          Serial.print(".");
+          delay(70);
+        }
+        Serial.println();
+        break;
+    }
+  }
+}
